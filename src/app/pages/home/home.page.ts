@@ -1,86 +1,94 @@
-import { Component } from '@angular/core';
-import { IonHeader, IonContent, IonButton, IonFooter, IonIcon } from '@ionic/angular';
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { 
+  IonHeader, 
+  IonContent, 
+  IonButton, 
+  IonFooter, 
+  IonIcon, 
+  IonToolbar, 
+  IonTitle 
+} from '@ionic/angular';
 import { addIcons } from 'ionicons';
-import {Preferences} from '@capacitor/preferences';
-import { ChangeDetectorRef } from '@angular/core';
-
-//Importa todos los iconos al estas vacias las llaves.
-import{caretDownOutline, caretUpOutline}from 'ionicons/icons'
+import { caretDownOutline, caretUpOutline } from 'ionicons/icons';
 
 @Component({
   selector: 'app-home',
   templateUrl: 'home.page.html',
   styleUrls: ['home.page.scss'],
-  imports: [IonHeader, IonContent, IonButton, IonFooter, IonIcon],
+  imports: [
+    CommonModule,
+    FormsModule,
+    IonHeader, 
+    IonContent, 
+    IonButton, 
+    IonFooter, 
+    IonIcon, 
+  
+   
+  ],
 })
+export class HomePage implements OnInit {
 
+  public numero: number = 0;
+  public readonly MINIMO: number = 0;
+  public readonly MAXIMO: number = 10;
+  private readonly KEY_NUMBER: string = 'ddr_key_number';
 
-//Aqui va toda la logica de la  pagina, Variables y metodos.
-export class HomePage {
-
-  public numero: number=0;
-
-  //Constantes
-  public readonly MINIMO: number=0;
-  public readonly MAXIMO: number=10;
-  private readonly KEY_NUMBER: string= 'ddr_key_number'
-
-  constructor(private cdr: ChangeDetectorRef) {
+  constructor() {
     addIcons({
       caretUpOutline,
       caretDownOutline
     });
-
   }
 
-  saveNumber(){
-    Preferences.set({
-      key: this.KEY_NUMBER,
-      value: this.numero.toString(),
+  ngOnInit() {
+    console.log('-> ngOnInit ejecutado');
+    this.loadNumber();
+  }
+
+  loadNumber() {
+    try {
+      const savedValue = localStorage.getItem(this.KEY_NUMBER);
+      console.log('-> Valor leído de localStorage:', savedValue);
+
+      if (savedValue !== null && savedValue !== undefined) {
+        const parsed = Number(savedValue);
+        if (!isNaN(parsed) && parsed >= this.MINIMO && parsed <= this.MAXIMO) {
+          this.numero = parsed;
+        } else {
+          this.numero = this.MINIMO;
+        }
+      } else {
+        this.numero = this.MINIMO;
+      }
+    } catch (error) {
+      console.error('Error al leer localStorage:', error);
+      this.numero = this.MINIMO;
     }
-    );
   }
 
-  async ionViewWillEnter(){
-    console.log('ionViewWillEnter')
-  
-
-  const counterPreferences= await Preferences.get({key: this.KEY_NUMBER});
-  if (counterPreferences.value){
-    const numero = +counterPreferences.value;
-    if (isNaN(numero) || numero < this.MINIMO || numero > this.MAXIMO ){
-
-    
-     this.numero=this.MINIMO;
-    this.saveNumber();
-  
-  }else{
-      this.numero= numero;
-      this.cdr.detectChanges();
-   }
+  saveNumber() {
+    try {
+      localStorage.setItem(this.KEY_NUMBER, this.numero.toString());
+      console.log('-> ¡Guardado exitoso en localStorage!', this.numero);
+    } catch (error) {
+      console.error('Error al guardar en localStorage:', error);
+    }
   }
-  }
-    
-  
 
-  counterup(){
-    
-    if(this.numero < this.MAXIMO){
+  counterup() {
+    if (this.numero < this.MAXIMO) {
       this.numero++;
-      this.saveNumber()
-      console.log('Up', this.numero)
-      
+      this.saveNumber();
     }
-
   }
 
-  counterdown(){
-  
-    if(this.numero > this.MINIMO){
-     this.numero--;
-     this.saveNumber();
-     console.log('Down', this.numero)
+  counterdown() {
+    if (this.numero > this.MINIMO) {
+      this.numero--;
+      this.saveNumber();
     }
   }
 }
-
