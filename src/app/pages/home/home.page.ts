@@ -25,8 +25,6 @@ import { caretDownOutline, caretUpOutline } from 'ionicons/icons';
     IonButton, 
     IonFooter, 
     IonIcon, 
-  
-   
   ],
 })
 export class HomePage implements OnInit {
